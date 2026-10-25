@@ -1,0 +1,13 @@
+{
+  "name": "seb-cbt-portal",
+  "version": "3.3.2",
+  "description": "Safe Exam Browser (SEB) & Exambro CBT Portal",
+  "main": "api/seb/handshake.js",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./server.ps1",
+    "test": "powershell -ExecutionPolicy Bypass -File ./test_server.ps1"
+  },
+  "keywords": ["safe-exam-browser", "seb", "exambro", "cbt"],
+  "author": "M. Ilyas (Creator)",
+  "license": "ISC"
+}

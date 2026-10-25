@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Exam Browser</title>
+  <meta name="description" content="Safe Exam Browser Client Interface">
+  <meta name="keywords" content="Safe Exam Browser, Kiosk">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="seb-kiosk-body">
+
+  <!-- ======================================================== -->
+  <!-- 0. FULLSCREEN ACTIVATION OVERLAY (Browser Gesture Gate)   -->
+  <!-- ======================================================== -->
+  <div class="fullscreen-entry-overlay" id="fullscreen-entry-overlay">
+    <div class="fullscreen-entry-card">
+      <img src="seb-logo.png" alt="SEB" class="entry-logo">
+      <h2 class="entry-title">Safe Exam Browser</h2>
+      <p class="entry-desc">Klik tombol di bawah untuk mengunci layar penuh dan memulai ujian.</p>
+      <button type="button" class="btn-enter-fullscreen" id="btn-enter-fullscreen">
+        Mulai &amp; Kunci Layar Penuh
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 1. SEB TOP BAR & CONTROLS (Top-Right Persis Gambar 4)    -->
+  <!-- ======================================================== -->
+  <header class="seb-top-bar" id="seb-top-bar">
+    <div class="seb-minimal-top-controls" id="seb-top-controls">
+      <button type="button" class="top-nav-icon" id="top-nav-back" title="Kembali" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <button type="button" class="top-nav-icon" id="top-nav-forward" title="Maju" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button type="button" class="top-nav-icon" id="top-nav-reload" title="Muat Ulang Halaman">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 2. MAIN VIEWPORT: AUTHENTIC GOOGLE FORMS EXAM CONTAINER   -->
+  <!-- ======================================================== -->
+  <main class="seb-viewport" id="seb-viewport">
+    
+    <!-- IFRAME CONTAINER (Diperbesar lebar & luas sesuai Gambar 2 & 4) -->
+    <div id="live-gform-wrapper" class="live-gform-wrapper" style="display: none;">
+      <iframe id="live-gform-iframe" class="live-gform-iframe" src="" frameborder="0" marginheight="0" marginwidth="0">Memuat formulir...</iframe>
+    </div>
+
+    <!-- NATIVE MULTI-STAGE GOOGLE FORMS SIMULATION -->
+    <div class="gform-container" id="gform-container">
+      
+      <!-- ========================================== -->
+      <!-- TAHAP 1: IDENTITAS AWAL & TOKEN UTAMA       -->
+      <!-- ========================================== -->
+      <div class="gform-section" id="gform-section-1">
+        
+        <!-- Header Card -->
+        <div class="gform-card header-card">
+          <div class="header-card-stripe"></div>
+          <div class="header-card-content">
+            <h1 class="gform-title">ULANGAN HARIAN 2</h1>
+            
+            <div class="gform-account-row" style="margin-top: 6px;">
+              <span class="account-email" id="account-login-text" style="font-weight: 500; color: #202124;">rawrlden@gmail.com</span>
+              <a href="javascript:void(0)" class="gform-link">Switch account</a>
+              <div style="width: 100%; font-size: 12px; color: #5f6368; margin-top: 4px;">
+                Your email will be recorded when you submit this form
+              </div>
+            </div>
+
+            <div class="gform-required-legend" style="color: #d93025; font-size: 12px; margin-top: 8px;">
+              * Indicates required question
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Card 1: TOKEN UTAMA (Persis seperti Gambar 2) -->
+        <div class="gform-card question-card" id="card-token">
+          <div class="gform-question-label">
+            TOKEN <span class="required-star">*</span>
+          </div>
+          <div class="gform-input-wrapper">
+            <input type="text" id="input-token" class="gform-input-text" placeholder="Jawaban Anda" value="ASAT2026" required>
+            <div class="gform-input-underline"></div>
+          </div>
+          <div class="gform-error-msg" id="error-token" style="display: none;">
+            Ini adalah pertanyaan yang wajib diisi. Token ujian tidak valid.
+          </div>
+        </div>
+
+        <!-- Actions (Persis seperti Gambar 2) -->
+        <div class="gform-actions-row">
+          <button type="button" class="gform-btn-next" id="btn-to-absensi">
+            Berikutnya
+          </button>
+          <button type="button" class="gform-btn-clear" id="btn-clear-s1">
+            Kosongkan formulir
+          </button>
+        </div>
+
+        <!-- Footer Disclaimer Asli Google Forms (Persis seperti Gambar 2) -->
+        <div class="gform-footer">
+          <p class="gform-disclaimer">Jangan pernah mengirimkan sandi melalui Google Formulir.</p>
+          <div class="gform-branding">
+            <span>Konten ini tidak dibuat atau didukung oleh Google. - </span>
+            <a href="javascript:void(0)" class="gform-footer-link">Persyaratan Layanan</a> -
+            <a href="javascript:void(0)" class="gform-footer-link">Kebijakan Privasi</a>
+          </div>
+          <div style="margin-top: 6px;">
+            <a href="javascript:void(0)" class="gform-footer-link">Apakah formulir ini tampak mencurigakan? Laporkan</a>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- TAHAP 2: ABSENSI & PRESENSI SISWA          -->
+      <!-- ========================================== -->
+      <div class="gform-section" id="gform-section-absensi" style="display: none;">
+        
+        <div class="gform-card header-card">
+          <div class="header-card-stripe"></div>
+          <div class="header-card-content">
+            <div class="gform-section-tag">Bagian 2 dari 4: Presensi / Kehadiran Siswa</div>
+            <h2 class="gform-title">Formulir Absensi Peserta ASAT</h2>
+            <p class="gform-subtitle">Silakan isi data kehadiran Anda dengan lengkap dan benar sebelum memilih mata pelajaran.</p>
+          </div>
+        </div>
+
+        <!-- Nama Siswa -->
+        <div class="gform-card question-card">
+          <div class="gform-question-label">
+            Nama Lengkap Siswa <span class="required-star">*</span>
+          </div>
+          <div class="gform-input-wrapper">
+            <input type="text" id="input-nama-siswa" class="gform-input-text" placeholder="Jawaban Anda" value="M. ILYAS" required>
+            <div class="gform-input-underline"></div>
+          </div>
+          <div class="gform-error-msg" id="error-nama" style="display: none;">Pertanyaan ini wajib diisi.</div>
+        </div>
+
+        <!-- NISN / No Peserta -->
+        <div class="gform-card question-card">
+          <div class="gform-question-label">
+            NISN / Nomor Peserta Ujian <span class="required-star">*</span>
+          </div>
+          <div class="gform-input-wrapper">
+            <input type="text" id="input-nisn" class="gform-input-text" placeholder="Jawaban Anda" value="0078912345" required>
+            <div class="gform-input-underline"></div>
+          </div>
+          <div class="gform-error-msg" id="error-nisn" style="display: none;">Pertanyaan ini wajib diisi.</div>
+        </div>
+
+        <!-- Pilihan Kelas -->
+        <div class="gform-card question-card">
+          <div class="gform-question-label">
+            Pilih Kelas <span class="required-star">*</span>
+          </div>
+          <div class="gform-options-list">
+            <label class="gform-option-item">
+              <input type="radio" name="radio-kelas" value="X-1" class="gform-radio" checked>
+              <span>X - 1 (Fase E)</span>
+            </label>
+            <label class="gform-option-item">
+              <input type="radio" name="radio-kelas" value="XI-IPA-1" class="gform-radio">
+              <span>XI - IPA 1 (Fase F)</span>
+            </label>
+            <label class="gform-option-item">
+              <input type="radio" name="radio-kelas" value="XI-IPS-1" class="gform-radio">
+              <span>XI - IPS 1 (Fase F)</span>
+            </label>
+            <label class="gform-option-item">
+              <input type="radio" name="radio-kelas" value="XII-MIPA-1" class="gform-radio">
+              <span>XII - MIPA 1</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Keterangan Hadir -->
+        <div class="gform-card question-card">
+          <div class="gform-question-label">
+            Status Kehadiran <span class="required-star">*</span>
+          </div>
+          <div class="gform-options-list">
+            <label class="gform-option-item">
+              <input type="radio" name="radio-hadir" value="Hadir" class="gform-radio" checked>
+              <span>Hadir (Di Ruang Ujian)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="gform-actions-row">
+          <button type="button" class="gform-btn-prev" id="btn-back-to-s1">
+            Kembali
+          </button>
+          <button type="button" class="gform-btn-next" id="btn-to-pilih-mapel">
+            Lanjut ke Pilihan Mapel
+          </button>
+          <button type="button" class="gform-btn-clear" id="btn-clear-absensi">
+            Kosongkan formulir
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- TAHAP 3: PILIH MAPEL & TOKEN MAPEL (L0G1K4)-->
+      <!-- ========================================== -->
+      <div class="gform-section" id="gform-section-mapel" style="display: none;">
+        
+        <div class="gform-card header-card">
+          <div class="header-card-stripe"></div>
+          <div class="header-card-content">
+            <div class="gform-section-tag">Bagian 3 dari 4: Pemilihan Mata Pelajaran</div>
+            <h2 class="gform-title">Pilih Ujian Mata Pelajaran</h2>
+            <p class="gform-subtitle">Pilih jadwal mapel ujian hari ini dan masukkan token khusus mapel yang dibagikan pengawas.</p>
+          </div>
+        </div>
+
+        <!-- Pilihan Mapel -->
+        <div class="gform-card question-card">
+          <div class="gform-question-label">
+            Mata Pelajaran Ujian <span class="required-star">*</span>
+          </div>
+          <div class="gform-options-list">
+            <label class="gform-option-item">
+              <input type="radio" name="radio-mapel" value="MTK" class="gform-radio" checked>
+              <span><strong>Matematika (MTK)</strong> - Kode: MTK-ASAT</span>
+            </label>
+            <label class="gform-option-item">
+              <input type="radio" name="radio-mapel" value="INFORMATIKA" class="gform-radio">
+              <span><strong>Informatika &amp; Literasi Komputer</strong> - Kode: INF-ASAT</span>
+            </label>
+            <label class="gform-option-item">
+              <input type="radio" name="radio-mapel" value="BAHASA_INDONESIA" class="gform-radio">
+              <span><strong>Bahasa Indonesia</strong> - Kode: BIN-ASAT</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Token Mapel (L0G1K4) -->
+        <div class="gform-card question-card" id="card-token-mapel">
+          <div class="gform-question-label">
+            TOKEN MATA PELAJARAN <span class="required-star">*</span>
+          </div>
+          <div class="gform-input-wrapper">
+            <input type="text" id="input-token-mapel" class="gform-input-text" placeholder="Jawaban Anda" value="L0G1K4" required>
+            <div class="gform-input-underline"></div>
+          </div>
+          <div class="gform-input-hint">
+            Petunjuk: Masukkan token mapel Matematika dari pengawas (Token: <code>L0G1K4</code>)
+          </div>
+          <div class="gform-error-msg" id="error-token-mapel" style="display: none;">
+            Token mata pelajaran salah! Harap periksa kembali token mapel Anda.
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="gform-actions-row">
+          <button type="button" class="gform-btn-prev" id="btn-back-to-absensi">
+            Kembali
+          </button>
+          <button type="button" class="gform-btn-next" id="btn-to-soal-ujian">
+            Mulai Kerjakan Soal
+          </button>
+          <button type="button" class="gform-btn-clear" id="btn-clear-mapel">
+            Kosongkan formulir
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- TAHAP 4: SOAL UJIAN MAPEL (MATEMATIKA/CBT) -->
+      <!-- ========================================== -->
+      <div class="gform-section" id="gform-section-soal" style="display: none;">
+        
+        <div class="gform-card header-card" style="background-color: #673ab7; color: #ffffff; border-radius: 8px; overflow: hidden; border: none;">
+          <div class="header-card-stripe" style="background-color: #512da8; height: 10px;"></div>
+          <div class="header-card-content" style="padding: 16px 24px; background-color: #673ab7;">
+            <h2 class="gform-title" id="soal-mapel-title" style="color: #ffffff; font-size: 22px; font-weight: 500; margin: 0; text-transform: lowercase;">soal</h2>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #d93025; padding: 0 4px; margin-top: -4px;">
+          * Indicates required question
+        </div>
+
+        <!-- List of Questions rendered dynamically -->
+        <div id="gform-questions-list"></div>
+
+        <!-- Actions -->
+        <div class="gform-actions-row">
+          <button type="button" class="gform-btn-prev" id="btn-back-to-mapel">
+            Kembali
+          </button>
+          <button type="button" class="gform-btn-submit" id="btn-submit-exam">
+            Kirim Jawaban ke Server
+          </button>
+          <button type="button" class="gform-btn-clear" id="btn-clear-soal">
+            Kosongkan formulir
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- TAHAP 5: SUBMISSION SELESAI                -->
+      <!-- ========================================== -->
+      <div class="gform-section" id="gform-section-completed" style="display: none;">
+        <div class="gform-card header-card">
+          <div class="header-card-stripe"></div>
+          <div class="header-card-content">
+            <h2 class="gform-title">ASAT 2025-2026</h2>
+            <p class="gform-completed-msg">Tanggapan dan absensi Anda telah dicatat oleh server pengawas.</p>
+            <div class="gform-score-box" id="completed-score-box">
+              <!-- Score breakdown -->
+            </div>
+            <div class="gform-submit-another">
+              <a href="javascript:void(0)" id="link-restart-exam" class="gform-link">Kirim tanggapan lain / Ulangi Ujian</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ======================================================== -->
+  <!-- 3. SEB BOTTOM TASKBAR (Warna Putih & Logo Bersih)         -->
+  <!-- ======================================================== -->
+  <footer class="seb-bottom-taskbar white-taskbar" id="seb-bottom-taskbar">
+    <div class="seb-taskbar-left">
+      <!-- SEB Official Logo Button (Teks Safe Exam Browser dihapus) -->
+      <button type="button" class="seb-logo-btn" id="seb-logo-btn" title="Safe Exam Browser - Klik untuk Info / Panel Riset">
+        <img src="seb-logo.png" alt="SEB Logo" class="seb-logo-img">
+      </button>
+    </div>
+
+    <!-- Center is empty as requested (Teks 'Kiosk Mode Aktif' dihapus) -->
+
+    <div class="seb-taskbar-right">
+      <!-- Live Clock (Tebal & Besar) -->
+      <span class="seb-clock dark-clock" id="seb-clock">08:30</span>
+
+      <!-- Keyboard Layout (Tebal & Besar) -->
+      <span class="seb-badge-lang dark-text" title="Keyboard Layout: English">ENG</span>
+
+      <!-- Taskbar Reload Icon (Ikon Panah Melingkar Tebal & Besar) -->
+      <button type="button" class="seb-icon-btn dark-icon" id="taskbar-btn-reload" title="Refresh Halaman">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36L21 8" />
+          <polyline points="21 3 21 8 16 8" />
+        </svg>
+      </button>
+
+      <!-- Taskbar Wifi Button (Gelombang Lengkung Sesuai Gambar 1) -->
+      <button type="button" class="seb-icon-btn dark-icon" id="taskbar-btn-wifi" title="Koneksi Jaringan Wi-Fi">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 8.5c4.2-3.8 9.8-3.8 14 0" />
+          <path d="M8.5 12c2.2-2 4.8-2 7 0" />
+          <circle cx="12" cy="16.5" r="1.5" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+
+      <!-- Taskbar Audio/Volume Button (Bisa Diklik & Berubah Ikon Sesuai Gambar 1) -->
+      <button type="button" class="seb-icon-btn dark-icon" id="taskbar-btn-audio" title="Audio Sistem: Aktif (Klik untuk Mematikan)">
+        <span id="audio-icon-container">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Taskbar Power/Off Button (Tanpa Latar Belakang Merah - Garis Tebal & Besar Sesuai Gambar 1 & 2) -->
+      <button type="button" class="seb-btn-power" id="taskbar-btn-power" title="Keluar dari Safe Exam Browser (Memerlukan Password: 1234567890)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.5v9" />
+          <path d="M18.36 6.64a9 9 0 1 1-12.72 0" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Wi-Fi Network Flyout (Native Windows / SEB Tray Network Menu) -->
+    <div class="seb-wifi-flyout" id="seb-wifi-flyout" style="display: none;">
+      <div class="wifi-flyout-header">
+        <div class="wifi-flyout-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 8.5c4.2-3.8 9.8-3.8 14 0" />
+            <path d="M8.5 12c2.2-2 4.8-2 7 0" />
+            <circle cx="12" cy="16.5" r="1.5" fill="currentColor" stroke="none" />
+          </svg>
+          <strong>Jaringan Wi-Fi</strong>
+        </div>
+        <label class="wifi-switch" title="Nyalakan/Matikan Wi-Fi">
+          <input type="checkbox" id="wifi-toggle-switch" checked>
+          <span class="wifi-slider"></span>
+        </label>
+      </div>
+
+      <div class="wifi-networks-list" id="wifi-networks-list">
+        <!-- Connected network -->
+        <div class="wifi-network-item connected" id="wifi-net-1">
+          <div class="wifi-net-left">
+            <div class="wifi-signal-bars full" title="Sinyal Penuh (100%)">
+              <span class="bar b1"></span>
+              <span class="bar b2"></span>
+              <span class="bar b3"></span>
+              <span class="bar b4"></span>
+            </div>
+            <div class="wifi-net-details">
+              <span class="wifi-net-ssid">MAN19-HOTSPOT-CBT</span>
+              <span class="wifi-net-status" id="wifi-cbt-status">Tersambung, aman (Hotspot Ujian)</span>
+            </div>
+          </div>
+          <button type="button" class="btn-wifi-action" id="btn-wifi-action-cbt">Tersambung</button>
+        </div>
+
+        <!-- Available network 2 -->
+        <div class="wifi-network-item" id="wifi-net-2">
+          <div class="wifi-net-left">
+            <div class="wifi-signal-bars strong">
+              <span class="bar b1"></span>
+              <span class="bar b2"></span>
+              <span class="bar b3"></span>
+              <span class="bar b4"></span>
+            </div>
+            <div class="wifi-net-details">
+              <span class="wifi-net-ssid">MAN19-GURU-5G</span>
+              <span class="wifi-net-status">Diamankan (WPA2)</span>
+            </div>
+          </div>
+          <button type="button" class="btn-wifi-action secondary" id="btn-wifi-action-guru">Hubungkan</button>
+        </div>
+
+        <!-- Available network 3 -->
+        <div class="wifi-network-item" id="wifi-net-3">
+          <div class="wifi-net-left">
+            <div class="wifi-signal-bars medium">
+              <span class="bar b1"></span>
+              <span class="bar b2"></span>
+              <span class="bar b3"></span>
+              <span class="bar b4 empty"></span>
+            </div>
+            <div class="wifi-net-details">
+              <span class="wifi-net-ssid">LAB-KOMPUTER-19</span>
+              <span class="wifi-net-status">Diamankan (WPA2)</span>
+            </div>
+          </div>
+          <button type="button" class="btn-wifi-action secondary" id="btn-wifi-action-lab">Hubungkan</button>
+        </div>
+      </div>
+
+      <div class="wifi-flyout-footer">
+        <span id="wifi-status-footer">IP: 192.168.1.108 &middot; Status: Online</span>
+      </div>
+    </div>
+
+    <!-- Volume / Audio Flyout Popup (Native Windows / SEB Tray Volume Slider) -->
+    <div class="seb-volume-flyout" id="seb-volume-flyout" style="display: none;">
+      <div class="volume-flyout-header">
+        <span class="volume-flyout-title">
+          <span id="volume-flyout-icon-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path>
+            </svg>
+          </span>
+          <strong>Volume Suara</strong>
+        </span>
+        <span class="volume-percent-badge" id="volume-percent-text">100%</span>
+      </div>
+      <div class="volume-slider-row">
+        <button type="button" class="btn-volume-mute-toggle" id="btn-volume-mute-toggle" title="Klik untuk Mute / Unmute">
+          <span id="volume-slider-mute-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path>
+            </svg>
+          </span>
+        </button>
+        <input type="range" min="0" max="100" value="100" class="volume-range-input" id="volume-range-input">
+      </div>
+      <div class="volume-flyout-footer">
+        <span>Speaker Laptop (Realtek High Definition Audio)</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ======================================================== -->
+  <!-- 4. SEB QUIT CONFIRMATION DIALOG (Identik dengan Gambar 2) -->
+  <!-- ======================================================== -->
+  <div class="seb-modal-overlay" id="seb-quit-modal" style="display: none;">
+    <div class="seb-modal-card seb-native-dialog">
+      <div class="seb-dialog-header">
+        <span class="seb-dialog-title">Close Safe Exam Browser</span>
+      </div>
+      <div class="seb-dialog-body">
+        <label for="quit-password-input" class="seb-dialog-label">Please enter the quit password:</label>
+        <input type="password" id="quit-password-input" class="seb-dialog-input" autocomplete="off">
+        <div class="seb-dialog-error" id="quit-error-text" style="display: none;">
+          Incorrect quit password!
+        </div>
+      </div>
+      <div class="seb-dialog-footer">
+        <button type="button" class="seb-dialog-btn" id="btn-confirm-quit">OK</button>
+        <button type="button" class="seb-dialog-btn" id="btn-cancel-quit">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- 5. HIDDEN PROCTOR & RESEARCH DRAWER (Akses via F2 / Logo)-->
+  <!-- ======================================================== -->
+  <aside class="proctor-drawer" id="proctor-drawer">
+    <div class="proctor-drawer-header">
+      <div class="proctor-drawer-title">
+        <strong>Konsol Server &amp; Riset CBT</strong>
+        <span>Akses Rahasia Pengawas (Shortcut: F2)</span>
+      </div>
+      <button type="button" class="btn-close-drawer" id="btn-close-drawer">&times;</button>
+    </div>
+
+    <div class="proctor-drawer-body">
+      <div class="drawer-card">
+        <h4>Link Google Form Asli (Online Mode)</h4>
+        <p class="drawer-desc">Masukkan URL Google Forms Anda di sini untuk memuat form asli secara langsung:</p>
+        <input type="text" id="drawer-live-url-input" class="form-input" placeholder="https://docs.google.com/forms/d/e/.../viewform">
+        <label class="drawer-checkbox-label" style="margin-top: 8px;">
+          <input type="checkbox" id="drawer-use-live-toggle"> Aktifkan Mode Google Form Online Asli
+        </label>
+        <button type="button" class="btn-primary" id="btn-drawer-apply-live-url" style="margin-top: 8px;">Terapkan Link Form</button>
+      </div>
+
+      <div class="drawer-card">
+        <h4>Simulasi Mode Browser Peserta</h4>
+        <select id="seb-client-mode-select" class="form-select">
+          <option value="wrapper" selected>Exambro / SEB Klien Resmi (Tervalidasi)</option>
+          <option value="standard">Peramban Biasa (Chrome / Firefox / Edge)</option>
+          <option value="spoof">Spoofed User-Agent (Tanpa Signature)</option>
+        </select>
+      </div>
+
+      <div class="drawer-card">
+        <h4>Kebijakan Filter Server</h4>
+        <label class="drawer-checkbox-label">
+          <input type="checkbox" id="drawer-switch-ua" checked> Wajibkan User-Agent Exambro
+        </label>
+        <label class="drawer-checkbox-label">
+          <input type="checkbox" id="drawer-switch-sig"> Wajibkan HMAC Signature Klien
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Rejection Alert Modal (When Chrome/Firefox submits) -->
+  <div class="seb-modal-overlay" id="seb-rejection-modal" style="display: none;">
+    <div class="seb-modal-card modal-rejection">
+      <div class="seb-modal-header">
+        <div class="rejection-icon">&#9888;</div>
+        <h3 class="seb-modal-title">Pengiriman Jawaban Ditolak oleh Server CBT</h3>
+      </div>
+      <div class="seb-modal-body">
+        <p class="rejection-alert" id="rejection-modal-reason">
+          Server mendeteksi pengiriman dilakukan dari peramban biasa (Google Chrome/Mozilla Firefox).
+        </p>
+        <div class="code-box">
+          <strong>Bukti Forensik Server:</strong><br>
+          Status HTTP: <code>403 Forbidden</code><br>
+          Keputusan: <span class="badge-verdict rejected">REJECTED_COMMERCIAL_BROWSER</span><br>
+          User-Agent Terbaca: <code id="rejection-modal-ua">-</code>
+        </div>
+      </div>
+      <div class="seb-modal-footer">
+        <button type="button" class="btn-secondary" id="btn-dismiss-rejection">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kiosk Lockout Alert Modal (Triggered on Window Blur / Tab Switch / Focus Lost) -->
+  <div class="seb-modal-overlay modal-lockout-alert" id="seb-lockout-modal" style="display: none; z-index: 2147483645;">
+    <div class="seb-modal-card">
+      <div class="seb-modal-header">
+        <div class="lockout-icon">&#9888;</div>
+        <h3 class="seb-modal-title">FOKUS UJIAN TERKUNCI (PERINGATAN PELANGGARAN)</h3>
+      </div>
+      <div class="seb-modal-body">
+        <p class="lockout-desc">
+          <strong>Sistem Safe Exam Browser mendeteksi percobaan beralih jendela, aplikasi, atau tab lain!</strong><br>
+          Sesuai regulasi ujian, Anda diwajibkan tetap berada di dalam jendela ujian sampai selesai. Seluruh aktivitas telah dicatat oleh server proktor.
+        </p>
+        <div class="lockout-stats-box">
+          Status Keamanan: <strong style="color: #ea4335;">FOKUS TERLEPAS DARI PERAMBAN</strong><br>
+          Jumlah Pelanggaran Terdeteksi: <span class="lockout-violation-count" id="lockout-violation-count">1</span> kali<br>
+          Waktu Pelanggaran: <span id="lockout-timestamp">-</span>
+        </div>
+        <p style="font-size: 12px; color: #5f6368; line-height: 1.4;">
+          Perhatian: Berpindah jendela ujian secara berulang dapat memicu diskualifikasi otomatis dari sistem proktor.
+        </p>
+      </div>
+      <div class="seb-modal-footer">
+        <button type="button" class="btn-resume-lock" id="btn-resume-focus">
+          &#128274; Kunci Kembali &amp; Lanjutkan Ujian
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Dropped Restore Gate (Triggered if Fullscreen drops unexpectedly) -->
+  <div class="fullscreen-restore-overlay" id="fullscreen-restore-overlay" style="display: none;">
+    <div class="fullscreen-restore-card">
+      <div style="font-size: 44px; color: #5746e3;">&#128274;</div>
+      <h2 style="font-size: 20px; font-weight: 700; color: #202124;">Layar Penuh Wajib Terkunci</h2>
+      <p style="font-size: 14px; color: #5f6368; line-height: 1.5;">
+        Kiosk Mode mewajibkan peramban berada dalam kondisi layar penuh permanen.<br>
+        Klik tombol di bawah untuk mengunci kembali layar penuh.
+      </p>
+      <button type="button" class="btn-resume-lock" id="btn-restore-fullscreen">
+        Kunci Layar Penuh Sekarang
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
