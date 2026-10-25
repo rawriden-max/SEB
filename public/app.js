@@ -336,22 +336,9 @@ function setupFullscreenLock() {
     });
   }
 
-  // Handle Fullscreen Exit Interception
+  // Handle Fullscreen Exit Interception (Senyap tanpa popup alert)
   document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement) {
-      if (!state.isAuthorizedExit && state.isKioskLocked) {
-        // Fullscreen lost unexpectedly! Re-trigger immediately or show barrier
-        if (el.fullscreenRestoreOverlay) {
-          el.fullscreenRestoreOverlay.style.display = 'flex';
-        } else {
-          el.fullscreenEntryOverlay.style.display = 'flex';
-        }
-        playSecurityAlertSound();
-        logSecurityViolation('FULLSCREEN_LOST');
-      }
-    } else {
-      if (el.fullscreenRestoreOverlay) el.fullscreenRestoreOverlay.style.display = 'none';
-      el.fullscreenEntryOverlay.style.display = 'none';
+    if (document.fullscreenElement) {
       engageKeyboardHardwareLock();
     }
   });
@@ -374,52 +361,18 @@ async function engageKeyboardHardwareLock() {
         'MetaRight',
         'ContextMenu'
       ]);
-      console.log('[Security] Hardware Keyboard Lock Activated.');
     } catch (e) {}
   }
 }
 
-// Audible Security Warning Sound (Web Audio API - respects volume slider & mute state)
-function playSecurityAlertSound() {
-  if (state.isAudioMuted || state.volumeLevel === 0) return; // Silent if volume is 0 or muted
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const volRatio = Math.max(0, Math.min(1, (state.volumeLevel || 100) / 100));
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.32);
-    gain.gain.setValueAtTime(0.28 * volRatio, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01 * volRatio, ctx.currentTime + 0.32);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.33);
-  } catch (e) {}
-}
+// Dinonaktifkan - Murni tanpa notifikasi suara
+function playSecurityAlertSound() {}
 
-// Anti-Focus & Tab Switch Interceptor
+// Anti-Focus & Tab Switch Interceptor (MURNI NO NOTIFIKASI)
 function setupAntiFocusDefense() {
-  // 1. Detect Loss of Window Focus (Alt+Tab, Clicking outside, switching applications)
-  window.addEventListener('blur', () => {
-    if (state.isKioskLocked && !state.isAuthorizedExit && !state.isQuittingModalOpen) {
-      handleFocusLostViolation('WINDOW_BLUR_SWITCH_ATTEMPT');
-    }
-  });
-
-  // 2. Detect Tab Visibility Change (Switching tabs or minimizing window)
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && state.isKioskLocked && !state.isAuthorizedExit) {
-      handleFocusLostViolation('TAB_VISIBILITY_HIDDEN');
-    }
-  });
-
-  // 3. Strict Keyboard Combinations Blockade
+  // Blokir kombinasi tombol terlarang secara senyap (tanpa popup alarm)
   window.addEventListener('keydown', (e) => {
-    // F2: Secret Proctor / Admin Drawer
+    // F2: Satu-satunya cara membuka Konsol Pengawas (Sesuai Permintaan!)
     if (e.key === 'F2') {
       e.preventDefault();
       toggleProctorDrawer();
@@ -440,7 +393,6 @@ function setupAntiFocusDefense() {
     if (e.altKey) {
       e.preventDefault();
       e.stopPropagation();
-      handleFocusLostViolation('ALT_KEY_COMBINATION_BLOCKED');
       return false;
     }
 
@@ -463,8 +415,7 @@ function setupAntiFocusDefense() {
     }
   }, true);
 
-  // 4. Disable Context Menu (Right Click / M2) - Hilangkan menu "Search Google", inspect, dll
-  // Tapi tetap berikan akses copy otomatis jika ada teks yang diblok
+  // M2 (Klik Kanan) Interception - Mencegat menu konteks dan otomatis salin teks secara senyap
   const handleContextMenuInterception = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -475,7 +426,6 @@ function setupAntiFocusDefense() {
     const selectedText = window.getSelection()?.toString();
     if (selectedText && selectedText.trim().length > 0) {
       copyTextToClipboard(selectedText);
-      showCopyToast('Teks berhasil disalin ke clipboard');
     }
     return false;
   };
@@ -490,46 +440,9 @@ function setupAntiFocusDefense() {
       e.stopPropagation();
     }
   }, true);
-
-  // 5. Intercept Multi-Finger Touchpad & Screen Gestures (3 or more fingers)
-  window.addEventListener('touchstart', (e) => {
-    if (e.touches && e.touches.length >= 3) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (state.isKioskLocked && !state.isAuthorizedExit) {
-        handleFocusLostViolation('TOUCHPAD_MULTI_FINGER_SWIPE_ATTEMPT');
-      }
-      return false;
-    }
-  }, { passive: false, capture: true });
-
-  // 6. Track Multi-Pointer Touchpad Contacts
-  const activePointers = new Set();
-  window.addEventListener('pointerdown', (e) => {
-    activePointers.add(e.pointerId);
-    if (activePointers.size >= 3) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (state.isKioskLocked && !state.isAuthorizedExit) {
-        handleFocusLostViolation('TOUCHPAD_3_FINGER_SWIPE_ATTEMPT');
-      }
-    }
-  }, { passive: false, capture: true });
-
-  const clearPointer = (e) => activePointers.delete(e.pointerId);
-  window.addEventListener('pointerup', clearPointer, { capture: true });
-  window.addEventListener('pointercancel', clearPointer, { capture: true });
-
-  // 7. Intercept Trackpad Pinch & Gesture Navigation
-  window.addEventListener('wheel', (e) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, { passive: false, capture: true });
 }
 
-// Copy Helper & Discreet Toast
+// Copy Helper (Senyap tanpa toast pop-up)
 function copyTextToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
@@ -552,38 +465,13 @@ function fallbackCopy(text) {
 }
 
 function showCopyToast(msg) {
-  let toast = document.getElementById('seb-copy-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'seb-copy-toast';
-    toast.className = 'seb-copy-toast';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = `✓ ${msg}`;
-  toast.classList.add('show');
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 1600);
+  // Dinonaktifkan - Murni tanpa notifikasi
 }
 
-// Trigger Security Violation & Lockout Alert
+// Telemetri senyap tanpa modal popup
 function handleFocusLostViolation(reason) {
   state.violationsCount++;
-  playSecurityAlertSound();
   logSecurityViolation(reason);
-
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
-
-  if (el.sebLockoutModal) {
-    if (el.lockoutViolationCount) el.lockoutViolationCount.textContent = state.violationsCount;
-    if (el.lockoutTimestamp) el.lockoutTimestamp.textContent = timeStr;
-    el.sebLockoutModal.style.display = 'flex';
-  }
-
-  // Force peramban merebut fokus kembali
-  window.focus();
 }
 
 function logSecurityViolation(reason) {
@@ -616,19 +504,9 @@ function enterFullscreen() {
     document.documentElement.requestFullscreen().then(() => {
       state.isKioskLocked = true;
       el.fullscreenEntryOverlay.style.display = 'none';
-      if (el.fullscreenRestoreOverlay) el.fullscreenRestoreOverlay.style.display = 'none';
       engageKeyboardHardwareLock();
-      lockTouchpadGestures();
     }).catch(() => {});
   }
-}
-
-function lockTouchpadGestures() {
-  fetch('/api/system/lock-touchpad', { method: 'POST' }).catch(() => {});
-}
-
-function restoreTouchpadGestures() {
-  fetch('/api/system/restore-touchpad', { method: 'POST' }).catch(() => {});
 }
 
 // ========================================================
@@ -992,10 +870,8 @@ function setupSebTaskbar() {
     });
   }
 
-  // Logo click opens hidden drawer
-  el.sebLogoBtn.addEventListener('click', () => {
-    toggleProctorDrawer();
-  });
+  // SEB Logo: Pasif murni seperti SEB asli (TIDAK MEMBUKA PANEL APAPUN SAAT DIKLIK)
+  // Panel laci pengawas HANYA bisa dibuka dengan menekan tombol F2 sesuai permintaan!
 
   // 1. Audio Flyout & Interactive Volume Slider
   function getAudioIconSvg(val, isMuted) {
@@ -1178,11 +1054,10 @@ function handleQuitConfirmation() {
     state.isQuittingModalOpen = false;
     el.sebQuitModal.style.display = 'none';
 
-    // 1. Lepas Hardware Keyboard Lock & Pulihkan Gestur Touchpad
+    // 1. Lepas Hardware Keyboard Lock
     if (navigator.keyboard && navigator.keyboard.unlock) {
       navigator.keyboard.unlock();
     }
-    restoreTouchpadGestures();
 
     // 2. Keluar dari fullscreen
     if (document.fullscreenElement && document.exitFullscreen) {

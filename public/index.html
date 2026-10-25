@@ -592,50 +592,6 @@
     </div>
   </div>
 
-  <!-- Kiosk Lockout Alert Modal (Triggered on Window Blur / Tab Switch / Focus Lost) -->
-  <div class="seb-modal-overlay modal-lockout-alert" id="seb-lockout-modal" style="display: none; z-index: 2147483645;">
-    <div class="seb-modal-card">
-      <div class="seb-modal-header">
-        <div class="lockout-icon">&#9888;</div>
-        <h3 class="seb-modal-title">FOKUS UJIAN TERKUNCI (PERINGATAN PELANGGARAN)</h3>
-      </div>
-      <div class="seb-modal-body">
-        <p class="lockout-desc">
-          <strong>Sistem Safe Exam Browser mendeteksi percobaan beralih jendela, aplikasi, atau tab lain!</strong><br>
-          Sesuai regulasi ujian, Anda diwajibkan tetap berada di dalam jendela ujian sampai selesai. Seluruh aktivitas telah dicatat oleh server proktor.
-        </p>
-        <div class="lockout-stats-box">
-          Status Keamanan: <strong style="color: #ea4335;">FOKUS TERLEPAS DARI PERAMBAN</strong><br>
-          Jumlah Pelanggaran Terdeteksi: <span class="lockout-violation-count" id="lockout-violation-count">1</span> kali<br>
-          Waktu Pelanggaran: <span id="lockout-timestamp">-</span>
-        </div>
-        <p style="font-size: 12px; color: #5f6368; line-height: 1.4;">
-          Perhatian: Berpindah jendela ujian secara berulang dapat memicu diskualifikasi otomatis dari sistem proktor.
-        </p>
-      </div>
-      <div class="seb-modal-footer">
-        <button type="button" class="btn-resume-lock" id="btn-resume-focus">
-          &#128274; Kunci Kembali &amp; Lanjutkan Ujian
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Fullscreen Dropped Restore Gate (Triggered if Fullscreen drops unexpectedly) -->
-  <div class="fullscreen-restore-overlay" id="fullscreen-restore-overlay" style="display: none;">
-    <div class="fullscreen-restore-card">
-      <div style="font-size: 44px; color: #5746e3;">&#128274;</div>
-      <h2 style="font-size: 20px; font-weight: 700; color: #202124;">Layar Penuh Wajib Terkunci</h2>
-      <p style="font-size: 14px; color: #5f6368; line-height: 1.5;">
-        Kiosk Mode mewajibkan peramban berada dalam kondisi layar penuh permanen.<br>
-        Klik tombol di bawah untuk mengunci kembali layar penuh.
-      </p>
-      <button type="button" class="btn-resume-lock" id="btn-restore-fullscreen">
-        Kunci Layar Penuh Sekarang
-      </button>
-    </div>
-  </div>
-
   <script src="app.js"></script>
 </body>
 </html>

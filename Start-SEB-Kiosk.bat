@@ -8,20 +8,13 @@ echo.
 
 :: ========================================================
 :: PENGATURAN ALAMAT UJIAN (LOKAL ATAU VERCEL DOMAIN)
-:: Ganti URL di bawah dengan domain Vercel Anda setelah deploy
+:: Ganti URL di bawah dengan domain Vercel Anda jika sudah deploy
 :: Contoh: set "EXAM_URL=https://seb-cbt-portal.vercel.app"
 :: ========================================================
 set "EXAM_URL=http://localhost:8080/"
 
 echo Membuka Portal Ujian: %EXAM_URL%
-echo.
-echo [1/2] Menonaktifkan gestur usap 3 jari & 4 jari di laptop Windows...
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v ThreeFingerSwipesEnabled /t REG_DWORD /d 0 /f >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v FourFingerSwipesEnabled /t REG_DWORD /d 0 /f >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v EnableEdgy /t REG_DWORD /d 0 /f >nul 2>&1
-echo [SUKSES] Fitur usap 3 jari (Task View) & 4 jari (Ganti Desktop) dimatikan!
-echo.
-echo [2/2] Mengunci peramban dalam Kiosk Mode Layar Penuh...
+echo Mengunci peramban dalam Kiosk Mode Layar Penuh...
 echo Password keluar resmi: 1234567890
 echo.
 
@@ -30,39 +23,27 @@ set "BROWSER_FLAGS=--kiosk %EXAM_URL% --edge-kiosk-type=fullscreen --no-first-ru
 :: Jalankan Microsoft Edge dalam Mode Kiosk
 where msedge >nul 2>&1
 if %errorlevel% equ 0 (
-    start "" /wait msedge.exe %BROWSER_FLAGS%
-    goto :RESTORE
+    start msedge.exe %BROWSER_FLAGS%
+    exit
 )
 
 :: Jalankan Google Chrome dalam Mode Kiosk
 where chrome >nul 2>&1
 if %errorlevel% equ 0 (
-    start "" /wait chrome.exe %BROWSER_FLAGS%
-    goto :RESTORE
+    start chrome.exe %BROWSER_FLAGS%
+    exit
 )
 
 :: Fallback path
 if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
-    start "" /wait "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" %BROWSER_FLAGS%
-    goto :RESTORE
+    start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" %BROWSER_FLAGS%
+    exit
 )
 
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    start "" /wait "C:\Program Files\Google\Chrome\Application\chrome.exe" %BROWSER_FLAGS%
-    goto :RESTORE
+    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" %BROWSER_FLAGS%
+    exit
 )
 
 start "" "%EXAM_URL%"
-
-:RESTORE
-echo.
-echo ========================================================
-echo   UJIAN SELESAI - MEMULIHKAN SISTEM LAPTOP
-echo ========================================================
-echo Mengaktifkan kembali gestur usap 3 jari & 4 jari di Windows...
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v ThreeFingerSwipesEnabled /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v FourFingerSwipesEnabled /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad" /v EnableEdgy /t REG_DWORD /d 1 /f >nul 2>&1
-echo [SELESAI] Gestur touchpad laptop telah normal kembali 100%%.
-timeout /t 3 >nul
 exit
